@@ -16,14 +16,14 @@ import (
  * @Desc:
  */
 var (
-	ErrCliNil    = errors.New("client is nil")
 	ErrDataNil   = errors.New("data is nil")
 )
-type RedisTool struct {
+
+type ToolRedis struct {
 	redisClient *redis.Pool
 }
 
-func (c *RedisTool) Connect(address, password string, db, maxIdle, maxActive, idleTimeout int) error {
+func (c *ToolRedis) Connect(address, password string, db, maxIdle, maxActive, idleTimeout int) error {
 	c.redisClient = &redis.Pool{
 		MaxIdle:     maxIdle,
 		MaxActive:   maxActive,
@@ -54,7 +54,7 @@ func (c *RedisTool) Connect(address, password string, db, maxIdle, maxActive, id
 	return nil
 }
 
-func (c *RedisTool) Close() error {
+func (c *ToolRedis) Close() error {
 	if err := c.redisClient.Close(); err != nil {
 		return err
 	}
@@ -62,16 +62,16 @@ func (c *RedisTool) Close() error {
 }
 
 //得到redis 池
-func (c *RedisTool) GetPool() *redis.Pool {
+func (c *ToolRedis) GetPool() *redis.Pool {
 	return c.redisClient
 }
 
 //得到一个客户端
-func (c *RedisTool) GetCli() redis.Conn {
+func (c *ToolRedis) GetCli() redis.Conn {
 	return c.redisClient.Get()
 }
 
-func (c *RedisTool) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
+func (c *ToolRedis) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	reply, err = cli.Do(commandName, args...)
@@ -82,7 +82,7 @@ func (c *RedisTool) Do(commandName string, args ...interface{}) (reply interface
 }
 
 // ZREVRange 返回有序集中指定分数区间内的成员，分数从高到低排序
-func (c *RedisTool) ZREVRange(key string, start int, limit int) (reply interface{}, err error) {
+func (c *ToolRedis) ZREVRange(key string, start int, limit int) (reply interface{}, err error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	reply, err = redis.Strings(cli.Do("ZREVRANGE", key, start, start+limit-1))
@@ -93,7 +93,7 @@ func (c *RedisTool) ZREVRange(key string, start int, limit int) (reply interface
 }
 
 // ZRange 通过索引区间返回有序集合指定区间内的成员
-func (c *RedisTool) ZRange(key string, start int, limit int) (reply interface{}, err error) {
+func (c *ToolRedis) ZRange(key string, start int, limit int) (reply interface{}, err error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	reply, err = redis.Strings(cli.Do("ZRANGE", key, start, start+limit-1))
@@ -104,7 +104,7 @@ func (c *RedisTool) ZRange(key string, start int, limit int) (reply interface{},
 }
 
 // ZScore 返回有序集合，成员的分数值
-func (c *RedisTool) ZScore(key string, defVal int64) (reply interface{}, err error) {
+func (c *ToolRedis) ZScore(key string, defVal int64) (reply interface{}, err error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	reply, err = cli.Do("ZSCORE", key, defVal)
@@ -115,7 +115,7 @@ func (c *RedisTool) ZScore(key string, defVal int64) (reply interface{}, err err
 }
 
 // ZRangeWithScore 通过索引区间返回有序集合指定区间内的成员
-func (c *RedisTool) ZRangeWithScore(key string, start int, limit int) (reply interface{}, err error) {
+func (c *ToolRedis) ZRangeWithScore(key string, start int, limit int) (reply interface{}, err error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	reply, err = redis.Strings(cli.Do("ZRANGE", key, start, start+limit-1, "WITHSCORES"))
@@ -126,7 +126,7 @@ func (c *RedisTool) ZRangeWithScore(key string, start int, limit int) (reply int
 }
 
 // ZRem 移除有序集合中的一个或多个元素
-func (c *RedisTool) ZRem(key string, defVal int64) error {
+func (c *ToolRedis) ZRem(key string, defVal int64) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("ZREM", key, defVal)
@@ -137,7 +137,7 @@ func (c *RedisTool) ZRem(key string, defVal int64) error {
 }
 
 // ZAdd 向有序集合添加一个或多个成员，或者更新已存在成员的分数
-func (c *RedisTool) ZAdd(key string, score int, defVal int64) error {
+func (c *ToolRedis) ZAdd(key string, score int, defVal int64) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("ZADD", key, score, defVal)
@@ -150,7 +150,7 @@ func (c *RedisTool) ZAdd(key string, score int, defVal int64) error {
 // ZRangeByScore 通过分数返回有序集合指定区间内的成员，顺序从小到大排列
 // +inf 显示右侧搜有的值
 // -inf 显示左侧所有的值
-func (c *RedisTool) ZRangeByScore(key string) ([][]byte, error) {
+func (c *ToolRedis) ZRangeByScore(key string) ([][]byte, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	score, err := redis.Values(cli.Do("ZRANGEBYSCORE", key, "+inf", "-inf"))
@@ -171,7 +171,7 @@ func (c *RedisTool) ZRangeByScore(key string) ([][]byte, error) {
 // ZREVRangeByScore 通过分数返回有序集合指定区间内的成员，顺序从大到小排列
 // +inf 显示右侧搜有的值
 // -inf 显示左侧所有的值
-func (c *RedisTool) ZREVRangeByScore(key string) ([][]byte, error) {
+func (c *ToolRedis) ZREVRangeByScore(key string) ([][]byte, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	score, err := redis.Values(cli.Do("ZREVRANGEBYSCORE", key, "+inf", "-inf"))
@@ -190,7 +190,7 @@ func (c *RedisTool) ZREVRangeByScore(key string) ([][]byte, error) {
 }
 
 // Incr 将 key 中储存的数字值增一。如果 key 不存在，那么 key 的值会先被初始化为 0 ，然后再执行 INCR 操作。取值范围 int64
-func (c *RedisTool) Incr(key string) error {
+func (c *ToolRedis) Incr(key string) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("INCR", key)
@@ -201,7 +201,7 @@ func (c *RedisTool) Incr(key string) error {
 }
 
 // Decr 将 key 中储存的数字值减一。如果 key 不存在，那么 key 的值会先被初始化为 0 ，然后再执行 DECR 操作。取值范围 int64
-func (c *RedisTool) Decr(key string) error {
+func (c *ToolRedis) Decr(key string) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("DECR", key)
@@ -215,7 +215,7 @@ func (c *RedisTool) Decr(key string) error {
 // 如果哈希表的 key 不存在，一个新的哈希表被创建并执行 HINCRBY 命令.
 // 如果指定的字段不存在，那么在执行命令前，字段的值被初始化为 0 。
 // 取值范围 int64
-func (c *RedisTool) HIncr(key string, field string) error {
+func (c *ToolRedis) HIncr(key string, field string) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("HINCRBY", key, field, 1)
@@ -229,7 +229,7 @@ func (c *RedisTool) HIncr(key string, field string) error {
 // 如果哈希表的 key 不存在，一个新的哈希表被创建并执行 HINCRBY 命令.
 // 如果指定的字段不存在，那么在执行命令前，字段的值被初始化为 0 。
 // 取值范围 int64
-func (c *RedisTool) HDecr(key string, feild string) error {
+func (c *ToolRedis) HDecr(key string, feild string) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("HINCRBY", key, feild, -1)
@@ -243,7 +243,7 @@ func (c *RedisTool) HDecr(key string, feild string) error {
 // 如果哈希表的 key 不存在，一个新的哈希表被创建并执行 HINCRBY 命令.
 // 如果指定的字段不存在，那么在执行命令前，字段的值被初始化为 0 。
 // 取值范围 int64
-func (c *RedisTool) HIDCount(key string, field string, count int) error {
+func (c *ToolRedis) HIDCount(key string, field string, count int) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("HINCRBY", key, field, count)
@@ -254,7 +254,7 @@ func (c *RedisTool) HIDCount(key string, field string, count int) error {
 }
 
 // Set 设置值, 设置expire 可以设置过期时间
-func (c *RedisTool) Set(key string, value interface{}, expire ...int) error {
+func (c *ToolRedis) Set(key string, value interface{}, expire ...int) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	var err error
@@ -269,7 +269,7 @@ func (c *RedisTool) Set(key string, value interface{}, expire ...int) error {
 }
 
 // MSet 用于同时设置一个或多个 key-value 对
-func (c *RedisTool) MSet(kvMap map[string]interface{}, expire ...int) error {
+func (c *ToolRedis) MSet(kvMap map[string]interface{}, expire ...int) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	var err error
@@ -292,14 +292,14 @@ func (c *RedisTool) MSet(kvMap map[string]interface{}, expire ...int) error {
 }
 
 // Get 根据key得到值
-func (c *RedisTool) Get(key string) (interface{}, error) {
+func (c *ToolRedis) Get(key string) (interface{}, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	val, err := cli.Do("GET", key)
 	return val, err
 }
 // MGet 用于同时获取一个或多个 key-value 对
-func (c *RedisTool) MGet(keys ...string) ([][]byte, error) {
+func (c *ToolRedis) MGet(keys ...string) ([][]byte, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	args := make([]interface{}, 0, len(keys))
@@ -319,7 +319,7 @@ func (c *RedisTool) MGet(keys ...string) ([][]byte, error) {
 }
 
 // AsInt 得到 int 值, 如果出错得到默认值
-func (c *RedisTool) AsInt(key string, defVal int) (int, error) {
+func (c *ToolRedis) AsInt(key string, defVal int) (int, error) {
 	value, err := redis.Int(c.Get(key))
 	if err != nil {
 		return defVal, err
@@ -328,7 +328,7 @@ func (c *RedisTool) AsInt(key string, defVal int) (int, error) {
 }
 
 // AsInt64 得到int64值，如果出错得到默认值
-func (c *RedisTool) AsInt64(key string, defVal int64) (int64, error) {
+func (c *ToolRedis) AsInt64(key string, defVal int64) (int64, error) {
 	value, err := redis.Int64(c.Get(key))
 	if err != nil {
 		return defVal, err
@@ -337,7 +337,7 @@ func (c *RedisTool) AsInt64(key string, defVal int64) (int64, error) {
 }
 
 // AsBytesAndExist 得到 int64 值，如果不存在，会报错 ErrDataNil
-func (c *RedisTool) AsInt64AndExist(key string, defVal int64) (int64, error) {
+func (c *ToolRedis) AsInt64AndExist(key string, defVal int64) (int64, error) {
 	bValue, err := c.Get(key)
 	if err != nil {
 		return defVal, err
@@ -353,7 +353,7 @@ func (c *RedisTool) AsInt64AndExist(key string, defVal int64) (int64, error) {
 }
 
 // AsString 得到 string 值, 如果出错得到默认值
-func (c *RedisTool) AsString(key string, defVal string) (string, error) {
+func (c *ToolRedis) AsString(key string, defVal string) (string, error) {
 	value, err := redis.String(c.Get(key))
 	if err != nil {
 		return defVal, err
@@ -362,7 +362,7 @@ func (c *RedisTool) AsString(key string, defVal string) (string, error) {
 }
 
 // AsBytesAndExist 得到 []byte 值，如果不存在，会报错 ErrDataNil
-func (c *RedisTool) AsBytesAndExist(key string, defVal []byte) ([]byte, error) {
+func (c *ToolRedis) AsBytesAndExist(key string, defVal []byte) ([]byte, error) {
 	bValue, err := c.Get(key)
 	if err != nil {
 		return defVal, err
@@ -378,7 +378,7 @@ func (c *RedisTool) AsBytesAndExist(key string, defVal []byte) ([]byte, error) {
 }
 
 // AsBytes 得到 []byte 值
-func (c *RedisTool) AsBytes(key string, defVal []byte) ([]byte, error) {
+func (c *ToolRedis) AsBytes(key string, defVal []byte) ([]byte, error) {
 	value, err := redis.Bytes(c.Get(key))
 	if err != nil {
 		return defVal, err
@@ -387,7 +387,7 @@ func (c *RedisTool) AsBytes(key string, defVal []byte) ([]byte, error) {
 }
 
 // Del 删除key
-func (c *RedisTool) Del(key string) error {
+func (c *ToolRedis) Del(key string) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("DEL", key)
@@ -395,7 +395,7 @@ func (c *RedisTool) Del(key string) error {
 }
 
 // IsExist 判断key是否存在
-func (c *RedisTool) IsExist(key string) (bool, error) {
+func (c *ToolRedis) IsExist(key string) (bool, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	isExist, err := redis.Bool(cli.Do("EXISTS", key))
@@ -406,7 +406,7 @@ func (c *RedisTool) IsExist(key string) (bool, error) {
 }
 
 // Append 追加字符串， 如果不存在直接创建
-func (c *RedisTool) Append(key string, value string) error {
+func (c *ToolRedis) Append(key string, value string) error {
 	if value == "" {
 		return nil
 	}
@@ -417,7 +417,7 @@ func (c *RedisTool) Append(key string, value string) error {
 }
 
 // Expire 给某个key设置过期时间
-func (c *RedisTool) Expire(key string, expire int) error {
+func (c *ToolRedis) Expire(key string, expire int) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := redis.Bool(cli.Do("EXPIRE", key, expire))
@@ -425,7 +425,7 @@ func (c *RedisTool) Expire(key string, expire int) error {
 }
 
 // SetObj 通过json序列化对象到redis
-func (c *RedisTool) SetObj(key string, obj interface{}, expire ...int) error {
+func (c *ToolRedis) SetObj(key string, obj interface{}, expire ...int) error {
 	value, err := json.Marshal(obj)
 	if err != nil {
 		return err
@@ -434,7 +434,7 @@ func (c *RedisTool) SetObj(key string, obj interface{}, expire ...int) error {
 }
 
 // AsObj 解析json序列化的数据
-func (c *RedisTool) AsObj(key string, obj interface{}) error {
+func (c *ToolRedis) AsObj(key string, obj interface{}) error {
 	value, err := c.AsBytes(key, nil)
 	if err != nil {
 		return err
@@ -454,7 +454,7 @@ func (c *RedisTool) AsObj(key string, obj interface{}) error {
 	zset (有序集)
 	hash (哈希表)
 */
-func (c *RedisTool) AsType(key string) string {
+func (c *ToolRedis) AsType(key string) string {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	value, err := redis.String(cli.Do("TYPE", key))
@@ -467,7 +467,7 @@ func (c *RedisTool) AsType(key string) string {
 // HMSet 命令用于同时将多个 field-value (字段-值)对设置到哈希表中
 // 此命令会覆盖哈希表中已存在的字段。
 // 如果哈希表不存在，会创建一个空哈希表，并执行 HMSET 操作。
-func (c *RedisTool) HMSet(key string, hMap map[string]interface{}) error {
+func (c *ToolRedis) HMSet(key string, hMap map[string]interface{}) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("HMSET", redis.Args{}.Add(key).AddFlat(hMap)...)
@@ -476,7 +476,7 @@ func (c *RedisTool) HMSet(key string, hMap map[string]interface{}) error {
 
 // HMSet 命令用于同时将多个 field-value (字段-值)对设置到哈希表中
 // 设置结构体到hash
-func (c *RedisTool) HMSetStruct(key string, value interface{}) error {
+func (c *ToolRedis) HMSetStruct(key string, value interface{}) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("HMSET", redis.Args{}.Add(key).AddFlat(value)...)
@@ -484,7 +484,7 @@ func (c *RedisTool) HMSetStruct(key string, value interface{}) error {
 }
 
 // HSet 在hash中设置值
-func (c *RedisTool) HSet(key, filed string, value interface{}) error {
+func (c *ToolRedis) HSet(key, filed string, value interface{}) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	valStr := parseToString(value)
@@ -496,7 +496,7 @@ func (c *RedisTool) HSet(key, filed string, value interface{}) error {
 }
 
 // HGet 获取hash值 返回 interface{}
-func (c *RedisTool) HGet(key, field string) (interface{}, error) {
+func (c *ToolRedis) HGet(key, field string) (interface{}, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	val, err := cli.Do("HGET", key, field)
@@ -504,13 +504,13 @@ func (c *RedisTool) HGet(key, field string) (interface{}, error) {
 }
 
 // AsHByte 获取hash值， 返回 []byte
-func (c *RedisTool) AsHByte(key, field string) ([]byte, error) {
+func (c *ToolRedis) AsHByte(key, field string) ([]byte, error) {
 	val, err := redis.Bytes(c.HGet(key, field))
 	return val, err
 }
 
 // AsHString 获取hash的 string 值
-func (c *RedisTool) AsHString(key, filed, defVal string) (string, error) {
+func (c *ToolRedis) AsHString(key, filed, defVal string) (string, error) {
 	val, err := redis.String(c.HGet(key, filed))
 	if err != nil {
 		return defVal, err
@@ -519,7 +519,7 @@ func (c *RedisTool) AsHString(key, filed, defVal string) (string, error) {
 }
 
 // AsHInt 获取hash的int值
-func (c *RedisTool) AsHInt(key, filed string, defVal int) (int, error) {
+func (c *ToolRedis) AsHInt(key, filed string, defVal int) (int, error) {
 	val, err := redis.Int(c.HGet(key, filed))
 	if err != nil {
 		return defVal, err
@@ -528,7 +528,7 @@ func (c *RedisTool) AsHInt(key, filed string, defVal int) (int, error) {
 }
 
 // AsHInt64 获取hash的int64值
-func (c *RedisTool) AsHInt64(key, filed string, defVal int64) (int64, error) {
+func (c *ToolRedis) AsHInt64(key, filed string, defVal int64) (int64, error) {
 	val, err := redis.Int64(c.HGet(key, filed))
 	if err != nil {
 		return defVal, err
@@ -537,7 +537,7 @@ func (c *RedisTool) AsHInt64(key, filed string, defVal int64) (int64, error) {
 }
 
 // AsHFloat 获取hash的浮点值
-func (c *RedisTool) AsHFloat(key, filed string, defVal float64) (float64, error) {
+func (c *ToolRedis) AsHFloat(key, filed string, defVal float64) (float64, error) {
 	val, err := redis.Float64(c.HGet(key, filed))
 	if err != nil {
 		return defVal, err
@@ -546,7 +546,7 @@ func (c *RedisTool) AsHFloat(key, filed string, defVal float64) (float64, error)
 }
 
 // AsHStruct 获取hash插入的结构体的数据
-func (c *RedisTool) AsHStruct(key string, out interface{}) error {
+func (c *ToolRedis) AsHStruct(key string, out interface{}) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	val, err := redis.Values(cli.Do("HGETALL", key))
@@ -560,7 +560,7 @@ func (c *RedisTool) AsHStruct(key string, out interface{}) error {
 }
 
 // HGetAll 获取hash的数据，返回[][]byte
-func (c *RedisTool) HGetAll(key string) ([][]byte, error) {
+func (c *ToolRedis) HGetAll(key string) ([][]byte, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	bVal, err := redis.ByteSlices(cli.Do("HGETALL", key))
@@ -574,7 +574,7 @@ func (c *RedisTool) HGetAll(key string) ([][]byte, error) {
 }
 
 // HDel 用于删除哈希表 key 中的一个或多个指定字段，不存在的字段将被忽略
-func (c *RedisTool) HDel(key string, fields ...string) error {
+func (c *ToolRedis) HDel(key string, fields ...string) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("HDEL", redis.Args{}.Add(key).AddFlat(fields)...)
@@ -588,7 +588,7 @@ func (c *RedisTool) HDel(key string, fields ...string) error {
 }
 
 // SisMember set 集合中判断成员元素是否是集合的成员
-func (c *RedisTool) SisMember(key string, field string) (bool, error) {
+func (c *ToolRedis) SisMember(key string, field string) (bool, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	isExist, err := redis.Int(cli.Do("SISMEMBER", key, field))
@@ -596,7 +596,7 @@ func (c *RedisTool) SisMember(key string, field string) (bool, error) {
 }
 
 // HExists 查看哈希表的指定字段是否存在
-func (c *RedisTool) HExists(key string, field string) (bool, error) {
+func (c *ToolRedis) HExists(key string, field string) (bool, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	isExist, err := redis.Bool(cli.Do("HEXISTS", key, field))
@@ -607,7 +607,7 @@ func (c *RedisTool) HExists(key string, field string) (bool, error) {
 }
 
 // SMembers 返回集合中的所有的成员。 不存在的集合 key 被视为空集合
-func (c *RedisTool) SMembers(key string) ([][]byte, error) {
+func (c *ToolRedis) SMembers(key string) ([][]byte, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	vals, err := redis.ByteSlices(cli.Do("SMEMBERS", key))
@@ -618,7 +618,7 @@ func (c *RedisTool) SMembers(key string) ([][]byte, error) {
 }
 
 // SScan 迭代集合中键的元素
-func (c *RedisTool) SScan(key string, cursor uint64, pattern string, count int) (uint64, []string, error) {
+func (c *ToolRedis) SScan(key string, cursor uint64, pattern string, count int) (uint64, []string, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	args := packArgs(key, cursor)
@@ -643,7 +643,7 @@ func (c *RedisTool) SScan(key string, cursor uint64, pattern string, count int) 
 // SetLPos list 在集合某个位置添加元素
 // 通过索引来设置元素的值
 // 当索引参数超出范围，或对一个空列表进行 LSET 时，返回一个错误
-func (c *RedisTool) SetLPos(key string, pos int, value interface{}) error {
+func (c *ToolRedis) SetLPos(key string, pos int, value interface{}) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("LSET", key, pos, value)
@@ -651,7 +651,7 @@ func (c *RedisTool) SetLPos(key string, pos int, value interface{}) error {
 }
 
 // LPush list 在集合头部添加
-func (c *RedisTool) LPush(key string, value interface{}) error {
+func (c *ToolRedis) LPush(key string, value interface{}) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("LPUSH", key, value)
@@ -659,7 +659,7 @@ func (c *RedisTool) LPush(key string, value interface{}) error {
 }
 
 // RPush list 在集合尾部添加
-func (c *RedisTool) RPush(key string, value interface{}) error {
+func (c *ToolRedis) RPush(key string, value interface{}) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("RPUSH", key, value)
@@ -667,7 +667,7 @@ func (c *RedisTool) RPush(key string, value interface{}) error {
 }
 
 // RPushStr 将一个或多个值插入到列表的尾部(最右边)
-func (c *RedisTool) RPushStr(key string, members ...string) (int, error) {
+func (c *ToolRedis) RPushStr(key string, members ...string) (int, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	return redis.Int(cli.Do("RPUSH", redis.Args{}.Add(key).AddFlat(members)...))
@@ -677,7 +677,7 @@ func (c *RedisTool) RPushStr(key string, members ...string) (int, error) {
 // 如果 count 为正数，且小于集合基数，那么命令返回一个包含 count 个元素的数组，数组中的元素各不相同。如果 count 大于等于集合基数，那么返回整个集合。
 // 如果 count 为负数，那么命令返回一个数组，数组中的元素可能会重复出现多次，而数组的长度为 count 的绝对值。
 // 该操作和 SPOP 相似，但 SPOP 将随机元素从集合中移除并返回，而 Srandmember 则仅仅返回随机元素，而不对集合进行任何改动
-func (c *RedisTool) SRandMemberCount(key string, count int) ([][]byte, error) {
+func (c *ToolRedis) SRandMemberCount(key string, count int) ([][]byte, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	res, err := redis.ByteSlices(cli.Do("SRANDMEMBER", key, count))
@@ -688,7 +688,7 @@ func (c *RedisTool) SRandMemberCount(key string, count int) ([][]byte, error) {
 }
 
 // SRandMember 返回一个随机元素；如果集合为空，返回 nil
-func (c *RedisTool) SRandMember(key string) ([]byte, error) {
+func (c *ToolRedis) SRandMember(key string) ([]byte, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	res, err := redis.Bytes(cli.Do("SRANDMEMBER", key))
@@ -699,7 +699,7 @@ func (c *RedisTool) SRandMember(key string) ([]byte, error) {
 }
 
 // SAdd 将一个或多个成员元素加入到集合中，已经存在于集合的成员元素将被忽略
-func (c *RedisTool) SAdd(key string, members ...string) error {
+func (c *ToolRedis) SAdd(key string, members ...string) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	args := packArgs(key, members)
@@ -709,7 +709,7 @@ func (c *RedisTool) SAdd(key string, members ...string) error {
 
 // SMove 指定成员 member 元素从 source 集合移动到 destination 集合。
 // SMove 是原子性操作。删除source，添加到destination集合中
-func (c *RedisTool) SMove(srcKey, destKey string, member string) error {
+func (c *ToolRedis) SMove(srcKey, destKey string, member string) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	_, err := cli.Do("SMOVE", srcKey, destKey, member)
@@ -717,7 +717,7 @@ func (c *RedisTool) SMove(srcKey, destKey string, member string) error {
 }
 
 // LTrim 对一个列表进行修剪(trim)，就是说，让列表只保留指定区间内的元素，不在指定区间之内的元素都将被删除。
-func (c *RedisTool) LTrim(key string, start int, stop int) (bool, error) {
+func (c *ToolRedis) LTrim(key string, start int, stop int) (bool, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	if res, err := redis.String(cli.Do("LTRIM", key, start, stop)); err == redis.ErrNil {
@@ -730,7 +730,7 @@ func (c *RedisTool) LTrim(key string, start int, stop int) (bool, error) {
 }
 
 // SRem 移除集合中的一个或多个成员元素，不存在的成员元素会被忽略
-func (c *RedisTool) SRem(key string, members ...string) error {
+func (c *ToolRedis) SRem(key string, members ...string) error {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	args := packArgs(key, members)
@@ -739,7 +739,7 @@ func (c *RedisTool) SRem(key string, members ...string) error {
 }
 
 // SCard 返回set集合中元素的数量
-func (c *RedisTool) SCard(key string) (int, error) {
+func (c *ToolRedis) SCard(key string) (int, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	val, err := redis.Int(cli.Do("SCARD", key))
@@ -750,7 +750,7 @@ func (c *RedisTool) SCard(key string) (int, error) {
 }
 
 // LLen 获取list集合长度
-func (c *RedisTool) LLen(key string) (int, error) {
+func (c *ToolRedis) LLen(key string) (int, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	num, err := redis.Int(cli.Do("llen", key))
@@ -762,7 +762,7 @@ func (c *RedisTool) LLen(key string) (int, error) {
 
 // LDataByIndex 通过索引获取列表中的元素。
 // 你也可以使用负数下标，以 -1 表示列表的最后一个元素， -2 表示列表的倒数第二个元素，以此类推。
-func (c *RedisTool) LDataByIndex(key string, index int) ([]byte, error) {
+func (c *ToolRedis) LDataByIndex(key string, index int) ([]byte, error) {
 	cli := c.redisClient.Get()
 	defer cli.Close()
 	value, err := redis.Bytes(cli.Do("lindex", key, index))
@@ -772,12 +772,75 @@ func (c *RedisTool) LDataByIndex(key string, index int) ([]byte, error) {
 	return value, nil
 }
 
+// LDataByRang 获取，bg到ed范围的元素
+func (c *ToolRedis) LDataByRang(key string, bg, ed int) ([][]byte, error) {
+	cli := c.redisClient.Get()
+	defer cli.Close()
+	values, err := redis.ByteSlices(cli.Do("lrange", key, bg, ed))
+	if err != nil {
+		if c.IsNil(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return values, nil
+}
 
+// LRem 移除列表中与参数 VALUE 相等的元素
+// count > 0 : 从表头开始向表尾搜索，移除与 VALUE 相等的元素，数量为 COUNT
+// count < 0 : 从表尾开始向表头搜索，移除与 VALUE 相等的元素，数量为 COUNT 的绝对值
+// count = 0 : 移除表中所有与 VALUE 相等的值
+func (c *ToolRedis) LRem(key string, value interface{}, count int) error {
+	cli := c.redisClient.Get()
+	defer cli.Close()
+	_, err := cli.Do("LREM", key, count, value)
+	return err
+}
 
+// LPop 删除头部的元素，并且返回头部的值
+func (c *ToolRedis) LPop(key string) ([]byte, error) {
+	cli := c.redisClient.Get()
+	defer cli.Close()
+	value, err := redis.Bytes(cli.Do("LPOP", key))
+	return value, err
+}
 
+// RPop 删除尾部的元素，并且返回尾部的值
+func (c *ToolRedis) RPop(key string) ([]byte, error) {
+	cli := c.redisClient.Get()
+	defer cli.Close()
+	value, err := redis.Bytes(cli.Do("RPOP", key))
+	return value, err
+}
 
+// TryLock (SET if Not eXists) 在指定的 key 不存在时，为 key 设置指定的值
+func (c *ToolRedis) TryLock(key string, val string, expire uint64) (bool, error) {
+	cli := c.redisClient.Get()
+	defer cli.Close()
+	res, err := redis.String(cli.Do("SET", key, val, "PX", expire, "NX"))
+	if err != nil {
+		return false, err
+	} else if strings.ToLower(res) != "ok" {
+		return false, nil
+	}
+	return true, nil
+}
 
-func (c *RedisTool) IsNil(err error) bool {
+// TryUnlock 解除锁
+func (c *ToolRedis) TryUnlock(key string) (bool, error) {
+	cli := c.redisClient.Get()
+	defer cli.Close()
+	res, err := redis.Int(cli.Do("DEL", key))
+	if err != nil {
+		return false, err
+	} else if res <= 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+// IsNil 判断是否是空
+func (c *ToolRedis) IsNil(err error) bool {
 	if err == redis.ErrNil {
 		return true
 	}

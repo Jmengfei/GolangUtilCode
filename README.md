@@ -64,3 +64,8 @@ id := node.Generate()
 func GenerateToken(userId, username interface{}) (string, error) 生成一个token
 func ParseToken(strToken string) (*JwtClaims, bool)  解析token
 ```
+
+* ### redis -> 「[redis-go](https://github.com/go-redis/redis)」
+```go
+
+```
