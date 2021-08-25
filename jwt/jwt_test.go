@@ -1,6 +1,9 @@
 package jwt
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 /**
  * @Author: mf
@@ -37,4 +40,17 @@ func TestParseToken(t *testing.T) {
 		t.Fatalf("claims=[%v]", *claims)
 	}
 	t.Logf("claims=[%+v]", *claims)
+}
+
+func TestConfigUpdate(t *testing.T) {
+	a := "1.8.9"
+	appVersion := "1.8.10"
+
+	if strings.Compare(appVersion, a) <= 0 {
+		t.Logf("强制更新")
+	} else if strings.Compare(appVersion, a) <= 0 {
+		t.Logf("非强制更新")
+	} else {
+		t.Logf("不需要更新")
+	}
 }

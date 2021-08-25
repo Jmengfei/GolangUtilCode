@@ -49,3 +49,4 @@ func TestToolRedisConnect(t *testing.T) {
 	cli := tRedis.GetCli()
 	t.Logf("tRedis=[%+v], pool=[%+v], cli=[%+v]", *tRedis, *pool, cli)
 }
+
