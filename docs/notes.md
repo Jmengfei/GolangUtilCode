@@ -16,3 +16,7 @@ mysql知识点汇总
 
 redis知识点汇总
 
+golang 书籍
+「[Go语言圣经](https://books.studygolang.com/gopl-zh/)」
+「[Go 语言设计与实现](https://draveness.me/golang/)」
+「[Go语言101](https://gfw.go101.org/article/101.html)」
